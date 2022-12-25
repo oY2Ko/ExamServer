@@ -13,6 +13,5 @@ namespace Server.Models
         [Required]
         public List<Question> Questions { get; set; }
 
-        TreeNode
     }
 }
