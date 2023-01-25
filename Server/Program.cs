@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<AppDbContext>();
+builder.Services.AddCors();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
     options.LoginPath = "/Register/login";
@@ -41,9 +42,9 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseCors(builder => builder.AllowAnyOrigin());
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Register}/register");
-
+var a = new AppDbContext();
 app.Run();

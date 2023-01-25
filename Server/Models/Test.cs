@@ -8,11 +8,12 @@ namespace Server.Models
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
-        [Required]
         public User Owner { get; set; }
         [Required]
         public List<Question> Questions { get; set; }
 
-        TreeNode
+        public string Description { get; set; }
+
+        public bool IsActive { get; set; }
     }
 }

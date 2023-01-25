@@ -17,15 +17,8 @@ namespace Server.Controllers
         }
 
         [HttpGet]
-        [Route("Add")]
-        public IActionResult Add([FromForm] string name, string )
-        {
-            return View();
-        }
-
-        [HttpGet]
         [Route("tests")]
-        public IActionResult GetTests(string filter)
+        public List<Test> GetTests(string filter)
         {
             var tests = new List<Test>();
             if (string.IsNullOrEmpty(filter))
@@ -36,7 +29,34 @@ namespace Server.Controllers
             {
                 tests = dbContext.Tests.Where(x => x.Name == filter).ToList();
             }
-            return View("../TestsView", new TestsViewModel(tests));
+            return tests;
+        }
+        [HttpPost]
+        [Route("SetActivation")]
+        public IActionResult SetTestActivation(bool isActive, int testId)
+        {
+
+            var test = dbContext.Tests.FirstOrDefault(x => x.Id == testId);
+            if (test != null)
+            {
+                test.IsActive = isActive;
+                dbContext.SaveChanges();
+                return Ok();
+            }
+            else
+            {
+                return Problem("There is no such test");
+            }
+
+        }
+
+        [HttpPost]
+        [Route("tests")]
+        public IActionResult AddTests(Test test)
+        {
+            dbContext.Tests.Add(test);
+            dbContext.SaveChanges();
+            return Ok();
         }
     }
 }

@@ -21,13 +21,6 @@ namespace Server.Controllers
         }
 
         [Route("register")]
-        [HttpGet]
-        public IActionResult GetRegisterPage()
-        {
-            return View("../RegisterView");
-        }
-
-        [Route("register")]
         [ValidateAntiForgeryToken]
         [HttpPost]
         public async Task<IActionResult> PostUser([FromForm] string name, string password, string role)
@@ -36,13 +29,6 @@ namespace Server.Controllers
             dbContext.SaveChanges();
             await Authenticate(name, role);
             return Ok();
-        }
-
-        [Route("login")]
-        [HttpGet]
-        public async Task<IActionResult> LogIn()
-        {
-            return View("../LogInView");
         }
 
         [Route("login")]
