@@ -9,7 +9,7 @@ namespace Server.Models
         [Required]
         public string Name { get; set; }
         public User Owner { get; set; }
-        [Required]
+        
         public List<Question> Questions { get; set; }
 
         public string Description { get; set; }

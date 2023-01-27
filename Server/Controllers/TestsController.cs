@@ -11,7 +11,7 @@ namespace Server.Controllers
     public class TestsController : Controller
     {
         private AppDbContext dbContext;
-        public TestsController(AppDbContext context) 
+        public TestsController(AppDbContext context)
         {
             dbContext = context;
         }
@@ -51,12 +51,14 @@ namespace Server.Controllers
         }
 
         [HttpPost]
-        [Route("tests")]
-        public IActionResult AddTests(Test test)
+        [Route("AddTest")]
+        public IActionResult AddTest([FromQuery]string name, [FromQuery] string description)
         {
-            dbContext.Tests.Add(test);
+            dbContext.Tests.Add(new Test() { Name = name, Description = description});
+            var a = Request;
             dbContext.SaveChanges();
             return Ok();
         }
+
     }
 }
