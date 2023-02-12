@@ -52,7 +52,7 @@ namespace Server.Controllers
 
         [HttpPost]
         [Route("AddTest")]
-        public IActionResult AddTest([FromQuery]string name, [FromQuery] string description)
+        public IActionResult AddTest([FromBody]string name,[FromBody]string description)
         {
             dbContext.Tests.Add(new Test() { Name = name, Description = description});
             var a = Request;
