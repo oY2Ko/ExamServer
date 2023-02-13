@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Server.Models;
 using Server.ViewModels;
 using System.Data.Entity;
 using System.Diagnostics.Eventing.Reader;
+using System.IO.Pipelines;
 
 namespace Server.Controllers
 {
@@ -52,12 +54,20 @@ namespace Server.Controllers
 
         [HttpPost]
         [Route("AddTest")]
-        public IActionResult AddTest([FromBody]string name,[FromBody]string description)
+        public IActionResult AddTest([FromBody]Test test, [FromBody] string owner = "DefaultUser")
         {
-            dbContext.Tests.Add(new Test() { Name = name, Description = description});
-            var a = Request;
+
+            dbContext.Tests.Add(new Test() { Name = test.Name, Description = test.Description, Owner = dbContext.Users.First(x => x.Name == owner)});
             dbContext.SaveChanges();
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetTest")]
+        public async Task<Test> GetTest([FromForm] int id)
+        {
+            var a = dbContext.Tests.FirstOrDefault(x => x.Id == id);
+            return a;
         }
 
     }
