@@ -66,8 +66,8 @@ namespace Server.Controllers
         [Route("GetTest")]
         public async Task<Test> GetTest([FromForm] int id)
         {
-            var a = dbContext.Tests.FirstOrDefault(x => x.Id == id);
-            return a;
+            var test = dbContext.Tests.FirstOrDefault(x => x.Id == id);
+            return test;
         }
 
     }
