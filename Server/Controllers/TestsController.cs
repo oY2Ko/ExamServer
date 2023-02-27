@@ -52,9 +52,15 @@ namespace Server.Controllers
 
         }
 
+        public class TestDTO
+        {
+            public string Name { get; set; }
+            public string Description { get; set; }
+        }
+
         [HttpPost]
         [Route("AddTest")]
-        public IActionResult AddTest([FromBody]Test test, [FromBody] string owner = "DefaultUser")
+        public IActionResult AddTest([FromBody]TestDTO test, [FromBody] string owner = "DefaultUser")
         {
 
             dbContext.Tests.Add(new Test() { Name = test.Name, Description = test.Description, Owner = dbContext.Users.First(x => x.Name == owner)});
@@ -64,7 +70,7 @@ namespace Server.Controllers
 
         [HttpGet]
         [Route("GetTest")]
-        public async Task<Test> GetTest([FromForm] int id)
+        public async Task<Test> GetTest([FromHeader]int id)
         {
             var test = dbContext.Tests.FirstOrDefault(x => x.Id == id);
             return test;
