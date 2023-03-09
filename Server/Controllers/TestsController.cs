@@ -29,7 +29,7 @@ namespace Server.Controllers
             }
             else
             {
-                tests = dbContext.Tests.Where(x => x.Name == filter).ToList();
+                tests = dbContext.Tests.Where(x => x.Name.ToLower().Contains(filter.ToLower())).ToList();
             }
             return tests;
         }
@@ -63,16 +63,16 @@ namespace Server.Controllers
         public IActionResult AddTest([FromBody]TestDTO test, [FromBody] string owner = "DefaultUser")
         {
 
-            dbContext.Tests.Add(new Test() { Name = test.Name, Description = test.Description, Owner = dbContext.Users.First(x => x.Name == owner)});
+            dbContext.Tests.Add(new Test() { Name = test.Name, Description = test.Description, Questions = new List<Question>() , Owner = dbContext.Users.First(x => x.Name == owner)});
             dbContext.SaveChanges();
             return Ok();
         }
 
         [HttpGet]
         [Route("GetTest")]
-        public async Task<Test> GetTest([FromHeader]int id)
+        public Test GetTest([FromHeader]int id)
         {
-            var test = dbContext.Tests.FirstOrDefault(x => x.Id == id);
+            var test =  dbContext.Tests.FirstOrDefault(x => x.Id == id);
             return test;
         }
 
