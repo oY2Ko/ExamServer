@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Server.Models
 {
@@ -12,7 +13,8 @@ namespace Server.Models
         public string Answer { get; set; }
         [Required]
         public double Mark { get; set; }
-        [Required]
+        public int TestId { get; set; }
         public Test Test { get; set; }
+
     }
 }

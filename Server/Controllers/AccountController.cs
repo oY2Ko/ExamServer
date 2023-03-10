@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
-using Server.Views;
-using System.Diagnostics;
+    using System.Diagnostics;
 using System.Security.Claims;
 
 namespace Server.Controllers
@@ -31,19 +30,6 @@ namespace Server.Controllers
             return Ok();
         }
 
-        [Route("login")]
-        [HttpPost]
-        public async Task<IActionResult> LogIn([FromForm]string name, string password)
-        {
-            var user = dbContext.Users.FirstOrDefault(user => user.Name == name && user.Password == password);
-            if (user == null)
-            {
-                return BadRequest("Неправильные данные входа");
-            }
-            Authenticate(user.Name, user.Role);
-            return Ok();
-        }
-
         [Route("logout")]
         [HttpGet]
         public async Task<IActionResult> LogOut()
@@ -52,11 +38,17 @@ namespace Server.Controllers
             return Ok();
         }
 
+        public class LogInDTO
+        {
+            public string Login { get; set; }
+            public string Password { get; set; }
+        }
+
         [Route("login")]
         [HttpPost]
-        public async Task<IActionResult> LogInPost([FromForm] string name, string password)
+        public async Task<IActionResult> LogInPost([FromBody] LogInDTO log)
         {
-            var user = dbContext.Users.FirstOrDefault(user => user.Name == name && user.Password == password);
+            var user = dbContext.Users.FirstOrDefault(user => user.Name == log.Login && user.Password == log.Password);
             if (user == null)
             {
                 return BadRequest("Неправильные данные входа");

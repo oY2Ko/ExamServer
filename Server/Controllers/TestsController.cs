@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
-using Server.ViewModels;
-using System.Data.Entity;
-using System.Diagnostics.Eventing.Reader;
-using System.IO.Pipelines;
+
 
 namespace Server.Controllers
 {
     [Route("{controller}")]
+    [Authorize]
     public class TestsController : Controller
     {
         private AppDbContext dbContext;
@@ -63,7 +62,7 @@ namespace Server.Controllers
         public IActionResult AddTest([FromBody]TestDTO test, [FromBody] string owner = "DefaultUser")
         {
 
-            dbContext.Tests.Add(new Test() { Name = test.Name, Description = test.Description, Questions = new List<Question>() , Owner = dbContext.Users.First(x => x.Name == owner)});
+            dbContext.Tests.Add(new Test() { Name = test.Name, Description = test.Description, Questions = new List<Question>(), Owner = dbContext.Users.First(x => x.Name == "DefaultUser")});
             dbContext.SaveChanges();
             return Ok();
         }
@@ -72,9 +71,38 @@ namespace Server.Controllers
         [Route("GetTest")]
         public Test GetTest([FromHeader]int id)
         {
-            var test =  dbContext.Tests.FirstOrDefault(x => x.Id == id);
+            var test = dbContext.Tests.Include(p => p.Questions).First(x => x.Id == id);
+            for (int i = 0; i < test.Questions.Count; i++)
+            {
+                test.Questions[i].Test = null;
+            }
             return test;
+            }
+
+        [HttpPost]
+        [Route("UpdateTest")]
+        public IActionResult UpdateTest([FromBody] Test test)
+        {
+            try
+            { 
+                dbContext.Update(test);
+                dbContext.SaveChanges();
+                return Ok();    
+            }
+            catch (Exception)
+            {
+
+                return BadRequest("There is no such test");
+            }
         }
 
+        [HttpDelete]
+        [Route("DeleteQuestion")]
+        public IActionResult DeleteQuestion([FromHeader] int id)
+        {
+            dbContext.Questions.Remove(dbContext.Questions.First(x => x.Id == id));
+            dbContext.SaveChanges();
+            return Ok();
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace Server.Models
         public string Password { get; set; }
         [Required]
         public string Role { get; set; }
+        public List<Test> Tests { get; set; }
         public User( string name, string password, string role)
         {
             Name = name;
