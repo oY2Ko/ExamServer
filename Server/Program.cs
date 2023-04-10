@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Server.Models;
+using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,17 +11,37 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<AppDbContext>();
 builder.Services.AddCors();
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+builder.Services.AddAuthentication("Main").AddCookie("Main", options =>
 {
-    options.LoginPath = "/Register/login";
+    //options.LoginPath = "/Account/login";
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.IsEssential = true;
+    //options.Cookie.MaxAge = new TimeSpan(0, 1, 0);
+    //options.ExpireTimeSpan = new TimeSpan(0, 1, 0);
+
 });
-builder.Services.AddAuthorization(options =>
+builder.Services.AddAuthorization(
+    options =>
 {
-    options.AddPolicy("Teacher", builder =>
+    options.AddPolicy("Admin", builder =>
     {
-        builder.RequireAssertion(x => x.User.HasClaim(ClaimTypes.Role, "Teacher"));
+        builder.RequireAssertion(x =>
+        {
+            var identity = x.User.Identities.Where(x => x.HasClaim("MyRole", "Admin")).ToList();
+            if (identity.Count > 0)
+            {
+                return true;
+            }
+            return false;
+
+        });
+        //builder.RequireClaim(ClaimsIdentity.DefaultRoleClaimType, "Admin");
+        //x.User.HasClaim(ClaimsIdentity.DefaultRoleClaimType, "Admin"));
+        //builder.RequireRole(ClaimsIdentity.DefaultRoleClaimType);
     });
-});
+}
+);
 
 var app = builder.Build();
 
@@ -40,17 +62,17 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseCors(builder =>
 {
-    builder.AllowAnyOrigin();
+    builder.SetIsOriginAllowed(x => true);
     builder.AllowAnyMethod();
     builder.AllowAnyHeader();
+    builder.AllowCredentials();
     }
 );
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Register}/register");
-var a = new AppDbContext();
 app.Run();

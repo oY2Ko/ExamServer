@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using Server.Models;
-    using System.Diagnostics;
 using System.Security.Claims;
 
 namespace Server.Controllers
 {
     [Route("{controller}")]
+
     public class AccountController : Controller
     {
         private AppDbContext dbContext;
@@ -29,12 +27,13 @@ namespace Server.Controllers
             await Authenticate(name, role);
             return Ok();
         }
-
-        [Route("logout")]
         [HttpGet]
+        [Route("logout")]
+        [Authorize("Main", Policy = "Admin")]
         public async Task<IActionResult> LogOut()
         {
-            await HttpContext.SignOutAsync();
+            HttpContext.Response.Cookies.Delete(".AspNetCore.Main");
+            await HttpContext.SignOutAsync("Main");
             return Ok();
         }
 
@@ -48,22 +47,28 @@ namespace Server.Controllers
         [HttpPost]
         public async Task<IActionResult> LogInPost([FromBody] LogInDTO log)
         {
+            var a = Request.Cookies;
+            
             var user = dbContext.Users.FirstOrDefault(user => user.Name == log.Login && user.Password == log.Password);
             if (user == null)
             {
                 return BadRequest("Неправильные данные входа");
             }
-            Authenticate(user.Name, user.Role);
+            //Response.Cookies.Append(ClaimsIdentity.DefaultRoleClaimType, "Admin", new CookieOptions() { Secure = true, SameSite = SameSiteMode. });
+            await Authenticate(user.Name, user.Role);
+            var useyyr = User;
             return Ok();
         }
 
-        private async Task Authenticate(string name, string role)
+        public async Task Authenticate(string name, string role)
         {
-            var claims = new List<Claim>();
-            claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, name));
-            claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, role));
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+            var claims = new List<Claim>
+            {
+                new Claim("MyName", name),
+                new Claim("MyRole", "Admin")
+            };
+            var identity = new ClaimsIdentity(claims, "Cookie");
+            await HttpContext.SignInAsync("Main", new ClaimsPrincipal(identity), new AuthenticationProperties(){ IsPersistent = true });
         }
     }
 }

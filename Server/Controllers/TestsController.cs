@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
-
+using System.Security.Claims;
 
 namespace Server.Controllers
 {
+
     [Route("{controller}")]
-    [Authorize]
+    [Authorize("Main", Policy = "Admin")]
     public class TestsController : Controller
     {
         private AppDbContext dbContext;
@@ -17,9 +20,29 @@ namespace Server.Controllers
             dbContext = context;
         }
 
+        public class tt
+        {
+            public int Id { get; set; }
+        }
+
+        [HttpDelete]
+        [Route("DeleteTest")]
+        public async Task<IActionResult> DeleteTest([FromHeader] int id)
+        {
+            var a = HttpContext;
+            var test = dbContext.Tests.FirstOrDefault(x => x.Id == id);
+            if (test == null)
+            {
+                return BadRequest("No such test");
+            }
+            dbContext.Tests.Remove(test);
+            dbContext.SaveChanges();
+            return Ok();
+        }
+
         [HttpGet]
         [Route("tests")]
-        public List<Test> GetTests(string filter)
+        public async Task<List<Test>> GetTests(string filter)
         {
             var tests = new List<Test>();
             if (string.IsNullOrEmpty(filter))
@@ -30,6 +53,10 @@ namespace Server.Controllers
             {
                 tests = dbContext.Tests.Where(x => x.Name.ToLower().Contains(filter.ToLower())).ToList();
             }
+
+
+            var us = User;
+
             return tests;
         }
         [HttpPost]
