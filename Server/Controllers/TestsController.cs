@@ -42,6 +42,7 @@ namespace Server.Controllers
 
         [HttpGet]
         [Route("tests")]
+        [AllowAnonymous]
         public async Task<List<Test>> GetTests(string filter)
         {
             var tests = new List<Test>();
@@ -88,7 +89,10 @@ namespace Server.Controllers
         [Route("AddTest")]
         public IActionResult AddTest([FromBody]TestDTO test, [FromBody] string owner = "DefaultUser")
         {
-
+            if (string.IsNullOrEmpty(test.Name))
+            {
+                return BadRequest("Empty Name");
+            }
             dbContext.Tests.Add(new Test() { Name = test.Name, Description = test.Description, Questions = new List<Question>(), Owner = dbContext.Users.First(x => x.Name == "DefaultUser")});
             dbContext.SaveChanges();
             return Ok();
@@ -110,6 +114,16 @@ namespace Server.Controllers
         [Route("UpdateTest")]
         public IActionResult UpdateTest([FromBody] Test test)
         {
+            if (test.Questions.Any(x => 
+            {
+
+                return string.IsNullOrEmpty(x.Text) || string.IsNullOrEmpty(x.Answer) || x.Mark == default(double)
+                || string.IsNullOrWhiteSpace(x.Text) || string.IsNullOrWhiteSpace(x.Answer);
+            }))
+            {
+                return BadRequest("Question's got empty fields");
+            }
+            
             try
             { 
                 dbContext.Update(test);
