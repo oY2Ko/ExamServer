@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
 using System.Security.Claims;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Server.Controllers
 {
@@ -48,7 +49,14 @@ namespace Server.Controllers
             var tests = new List<Test>();
             if (string.IsNullOrEmpty(filter))
             {
-                tests = dbContext.Tests.ToList();
+                tests = dbContext.Tests.Include(x => x.Questions).ToList();
+                for (int i = 0; i < tests.Count; i++)
+                {
+                    for (int j = 0; j < tests[i].Questions.Count; j++)
+                    {
+                        tests[i].Questions[j].Test = null;
+                    }
+                }
             }
             else
             {
